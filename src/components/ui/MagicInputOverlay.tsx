@@ -8,7 +8,6 @@ interface MagicalInputProps {
   className?: string;
   multiline?: boolean;
   autoFocus?: boolean;
-  type?: 'text' | 'password'; // password simulation
 }
 
 const MagicalInput: React.FC<MagicalInputProps> = ({ 
@@ -18,7 +17,6 @@ const MagicalInput: React.FC<MagicalInputProps> = ({
   className, 
   multiline,
   autoFocus,
-  type = 'text'
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   const triggerRipple = usePensieveStore((state) => state.triggerRipple);

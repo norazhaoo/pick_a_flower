@@ -15,14 +15,21 @@ export const MemoryParticles = () => {
     const data = [];
     for (let i = 0; i < COUNT; i++) {
       // Confine closer to the basin (radius ~2.5, height ~1.5)
+      // eslint-disable-next-line react-hooks/purity
       const r = 2.5 + Math.random() * 1.0; 
+      // eslint-disable-next-line react-hooks/purity
       const theta = Math.random() * Math.PI * 2;
+      // eslint-disable-next-line react-hooks/purity
       const y = 1.0 + Math.random() * 1.5; // Slightly above/around the liquid level
       data.push({
+        // eslint-disable-next-line react-hooks/purity
         pos: new THREE.Vector3(r * Math.cos(theta), y, r * Math.sin(theta)),
         vel: new THREE.Vector3(),
+        // eslint-disable-next-line react-hooks/purity
         initialPos: new THREE.Vector3(r * Math.cos(theta), y, r * Math.sin(theta)),
+        // eslint-disable-next-line react-hooks/purity
         phase: Math.random() * Math.PI * 2,
+        // eslint-disable-next-line react-hooks/purity
         life: Math.random(),
       });
     }

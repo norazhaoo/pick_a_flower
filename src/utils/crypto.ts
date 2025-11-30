@@ -46,7 +46,7 @@ export async function deriveKeyFromPassphrase(
       salt: salt,
       iterations: 100000,
       hash: 'SHA-256',
-    },
+    } as Pbkdf2Params,
     keyMaterial,
     { name: 'AES-GCM', length: 256 },
     false,
@@ -104,7 +104,7 @@ export async function decryptDiary(
 
     const decoder = new TextDecoder();
     return decoder.decode(decrypted);
-  } catch (error) {
+  } catch {
     throw new Error('Failed to decrypt. Wrong passphrase or corrupted data.');
   }
 }
