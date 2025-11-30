@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { usePensieveStore } from '../../state/pensieveState';
 import { decryptDiary } from '../../utils/crypto';
 import { deserializePayload } from '../../utils/url';

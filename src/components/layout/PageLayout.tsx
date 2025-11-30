@@ -1,4 +1,3 @@
-import React from 'react';
 import { PensieveScene } from '../pensieve/PensieveScene';
 import { CreateMemoryPanel } from './CreateMemoryPanel';
 import { UnlockMemoryPanel } from './UnlockMemoryPanel';

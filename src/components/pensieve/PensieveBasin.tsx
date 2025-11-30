@@ -1,5 +1,5 @@
-import { useRef, useMemo, useState, useEffect } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useRef, useMemo, useState } from 'react';
+import { useFrame, type ThreeEvent } from '@react-three/fiber';
 import * as THREE from 'three';
 import { usePensieveStore } from '../../state/pensieveState';
 
@@ -14,7 +14,6 @@ const BowlGeometry = () => {
     const outerRadius = 2.5;
     const height = 1.5;
     const thickness = 0.5; // Bottom thickness
-    const rimThickness = outerRadius - innerRadius;
 
     // 1. Inner surface (curved bottom to rim)
     // Start at center bottom (0, thickness)
@@ -170,7 +169,7 @@ export const PensieveBasin = () => {
     }
   });
 
-  const handlePointerOver = (e: THREE.Event) => {
+  const handlePointerOver = (e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation();
     setHovered(true);
     setBasinHovered(true);

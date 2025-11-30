@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { EffectComposer, Bloom, Vignette, Noise } from '@react-three/postprocessing';
 import { BlendFunction } from 'postprocessing';
@@ -82,7 +82,7 @@ const SceneContent = ({ onRevealCompleted }: { onRevealCompleted?: () => void })
         <MemoryParticles />
       </group>
 
-      <EffectComposer disableNormalPass>
+      <EffectComposer>
         <Bloom luminanceThreshold={0.4} mipmapBlur intensity={1.2} radius={0.5} />
         <Vignette offset={0.2} darkness={0.7} eskil={false} />
         <Noise opacity={0.03} blendFunction={BlendFunction.OVERLAY} />
