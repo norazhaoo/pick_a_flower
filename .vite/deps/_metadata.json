@@ -1,0 +1,76 @@
+{
+  "hash": "5990e44f",
+  "configHash": "e502dae3",
+  "lockfileHash": "93dcc3e3",
+  "browserHash": "fa4463dc",
+  "optimized": {
+    "react/jsx-dev-runtime": {
+      "src": "../../node_modules/react/jsx-dev-runtime.js",
+      "file": "react_jsx-dev-runtime.js",
+      "fileHash": "25f6b2ca",
+      "needsInterop": true
+    },
+    "react": {
+      "src": "../../node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "62211f91",
+      "needsInterop": true
+    },
+    "react-dom/client": {
+      "src": "../../node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "f7dc8e5e",
+      "needsInterop": true
+    },
+    "@react-three/fiber": {
+      "src": "../../node_modules/@react-three/fiber/dist/react-three-fiber.esm.js",
+      "file": "@react-three_fiber.js",
+      "fileHash": "47d099a0",
+      "needsInterop": false
+    },
+    "@react-three/postprocessing": {
+      "src": "../../node_modules/@react-three/postprocessing/dist/index.js",
+      "file": "@react-three_postprocessing.js",
+      "fileHash": "60232fa6",
+      "needsInterop": false
+    },
+    "postprocessing": {
+      "src": "../../node_modules/postprocessing/build/index.js",
+      "file": "postprocessing.js",
+      "fileHash": "7663a1c3",
+      "needsInterop": false
+    },
+    "three": {
+      "src": "../../node_modules/three/build/three.module.js",
+      "file": "three.js",
+      "fileHash": "f402f419",
+      "needsInterop": false
+    },
+    "zustand": {
+      "src": "../../node_modules/zustand/esm/index.mjs",
+      "file": "zustand.js",
+      "fileHash": "d99e715a",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-JGQEI6HP": {
+      "file": "chunk-JGQEI6HP.js"
+    },
+    "chunk-RH4P7E5B": {
+      "file": "chunk-RH4P7E5B.js"
+    },
+    "chunk-MA6LCPMS": {
+      "file": "chunk-MA6LCPMS.js"
+    },
+    "chunk-3IVW7EQW": {
+      "file": "chunk-3IVW7EQW.js"
+    },
+    "chunk-7KC2DZ2O": {
+      "file": "chunk-7KC2DZ2O.js"
+    },
+    "chunk-DC5AMYBS": {
+      "file": "chunk-DC5AMYBS.js"
+    }
+  }
+}
