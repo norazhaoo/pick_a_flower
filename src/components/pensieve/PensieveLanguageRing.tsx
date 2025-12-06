@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Text } from '@react-three/drei';
 import { usePensieveState, Language } from '@/state/pensieveState';
 import { useFrame } from '@react-three/fiber';
-import { Vector3, Euler } from 'three';
+import { Euler } from 'three';
 
 // Static map of languages for the ring
 const languagesConfig: { code: Language; label: string }[] = [
@@ -61,7 +61,7 @@ const PensieveLanguageRing: React.FC = () => {
 interface LanguageItemProps {
   label: string;
   position: [number, number, number];
-  rotation: [number, number, number];
+  rotation: Euler | [number, number, number];
   isActive: boolean;
   isSelected: boolean;
   onClick: () => void;
@@ -75,7 +75,7 @@ const LanguageItem: React.FC<LanguageItemProps> = ({
   // Subtle floating animation for selected/hovered items
   // Removed unused 'vec'
   
-  useFrame((state) => {
+  useFrame(() => {
      if (isSelected) {
          // Pulse effect
          // Removed unused 't'
