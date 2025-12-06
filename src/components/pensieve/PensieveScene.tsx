@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Environment } from '@react-three/drei';
 import { EffectComposer, Bloom, Noise, Vignette } from '@react-three/postprocessing';
@@ -11,17 +11,31 @@ import { usePensieveState } from '@/state/pensieveState';
 
 const PensieveScene: React.FC = () => {
   const { isUnlocked } = usePensieveState();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Adjust camera Z position: move back on mobile to fit the basin
+  const cameraPosition: [number, number, number] = isMobile ? [0, 8, 16] : [0, 5, 8];
 
   return (
     <div className="w-full h-screen bg-black">
       <Canvas>
-        <PerspectiveCamera makeDefault position={[0, 5, 8]} fov={45} />
+        <PerspectiveCamera makeDefault position={cameraPosition} fov={45} />
         <OrbitControls 
           enablePan={false} 
           maxPolarAngle={Math.PI / 2.1} 
           minPolarAngle={Math.PI / 6}
-          minDistance={4}
-          maxDistance={12}
+          minDistance={isMobile ? 8 : 4}
+          maxDistance={isMobile ? 20 : 12}
         />
         
         {/* Low ambient light to allow for contrast */}
