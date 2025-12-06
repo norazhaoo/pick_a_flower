@@ -73,12 +73,12 @@ const LanguageItem: React.FC<LanguageItemProps> = ({
   label, position, rotation, isActive, isSelected, onClick, onPointerOver, onPointerOut 
 }) => {
   // Subtle floating animation for selected/hovered items
-  const vec = new Vector3(...position);
+  // Removed unused 'vec'
   
   useFrame((state) => {
      if (isSelected) {
          // Pulse effect
-         const t = state.clock.getElapsedTime();
+         // Removed unused 't'
          // Slight vertical bob or color pulse logic could go here
      }
   });
@@ -86,7 +86,7 @@ const LanguageItem: React.FC<LanguageItemProps> = ({
   return (
     <Text
       position={position}
-      rotation={rotation}
+      rotation={rotation as any} // Cast to any to avoid strict tuple check
       fontSize={isSelected ? 0.35 : 0.25}
       // Use default font to avoid loading errors
       color={isSelected ? "#ffffff" : (isActive ? "#e2e8f0" : "#64748b")}

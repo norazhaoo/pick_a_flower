@@ -125,7 +125,7 @@ extend({ SmokeShaderMaterial });
 const MemoryThread: React.FC = () => {
   const materialRef = useRef<any>();
 
-  useFrame((state, delta) => {
+  useFrame((_state, delta) => {
     if (materialRef.current) {
       materialRef.current.uTime += delta;
     }
