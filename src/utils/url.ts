@@ -1,9 +1,11 @@
 export const generateShareLink = (ciphertext: string): string => {
-  const baseUrl = window.location.origin;
-  // We use hash so the data isn't sent to the server (if any) and it looks cleaner
+  // Get the full base URL including subdirectory (e.g. /pick_a_flower/)
+  // window.location.origin only gives the domain
+  const baseUrl = window.location.origin + window.location.pathname;
+  
   // Encode the ciphertext to be URL safe
   const encoded = encodeURIComponent(ciphertext);
-  return `${baseUrl}/#m=${encoded}`;
+  return `${baseUrl}#m=${encoded}`;
 };
 
 export const getMemoryFromUrl = (): string | null => {
