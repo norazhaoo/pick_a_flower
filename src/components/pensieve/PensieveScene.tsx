@@ -1,110 +1,84 @@
-import { useEffect } from 'react';
-import { Canvas, useThree } from '@react-three/fiber';
-import { EffectComposer, Bloom, Vignette, Noise } from '@react-three/postprocessing';
-import { BlendFunction } from 'postprocessing';
-import { PensieveBasin } from './PensieveBasin';
-import { PensieveLiquid } from './PensieveLiquid';
-import { MemoryThread } from './MemoryThread';
-import { MemoryParticles } from './MemoryParticles';
-import { usePensieveStore, type PensieveMode } from '../../state/pensieveState';
-import * as THREE from 'three';
+import React, { Suspense } from 'react';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, PerspectiveCamera, Environment } from '@react-three/drei';
+import { EffectComposer, Bloom, Noise, Vignette } from '@react-three/postprocessing';
+import PensieveBasin from './PensieveBasin';
+import PensieveLiquid from './PensieveLiquid';
+import MemoryParticles from './MemoryParticles';
+import MemoryThread from './MemoryThread';
+import PensieveLanguageRing from './PensieveLanguageRing';
+import { usePensieveState } from '@/state/pensieveState';
 
-interface PensieveSceneProps {
-  mode?: PensieveMode;
-  onRevealCompleted?: () => void;
-}
-
-// Component to handle responsive camera adjustments
-const ResponsiveCamera = () => {
-  const { camera, size } = useThree();
-  
-  useEffect(() => {
-    const aspect = size.width / size.height;
-    
-    // Base position for desktop (wide)
-    const basePos = new THREE.Vector3(0, 6, 5);
-    
-    if (aspect < 1.0) {
-      // Portrait mode (mobile)
-      // Move camera back and up to keep basin in frame
-      // Scale factor based on how narrow it is
-      const factor = 1.0 / aspect; 
-      camera.position.set(0, basePos.y * Math.pow(factor, 0.5), basePos.z * factor);
-    } else {
-      // Landscape
-      camera.position.copy(basePos);
-    }
-    
-    camera.lookAt(0, -0.5, 0);
-    camera.updateProjectionMatrix();
-  }, [size, camera]);
-
-  return null;
-};
-
-const SceneContent = ({ onRevealCompleted }: { onRevealCompleted?: () => void }) => {
-  const mode = usePensieveStore((state) => state.mode);
-  
-  useEffect(() => {
-    if (mode === 'REVEALED' && onRevealCompleted) {
-      const timer = setTimeout(onRevealCompleted, 2000); 
-      return () => clearTimeout(timer);
-    }
-  }, [mode, onRevealCompleted]);
+const PensieveScene: React.FC = () => {
+  const { isUnlocked } = usePensieveState();
 
   return (
-    <>
-      {/* Dark, moody gradient background */}
-      <color attach="background" args={['#050a10']} />
-      <fog attach="fog" args={['#050a10', 8, 20]} />
+    <div className="w-full h-screen bg-black">
+      <Canvas>
+        <PerspectiveCamera makeDefault position={[0, 5, 8]} fov={45} />
+        <OrbitControls 
+          enablePan={false} 
+          maxPolarAngle={Math.PI / 2.1} 
+          minPolarAngle={Math.PI / 6}
+          minDistance={4}
+          maxDistance={12}
+        />
+        
+        {/* Low ambient light to allow for contrast */}
+        <ambientLight intensity={0.1} />
+        
+        {/* Main Moon/Key Light - Cool blue-white, casting shadows */}
+        <pointLight position={[8, 12, 8]} intensity={1.5} color="#c0d0ff" />
+        
+        {/* Fill Light - Darker blue to lift shadows slightly */}
+        <pointLight position={[-10, 5, -10]} intensity={0.5} color="#1e293b" />
+        
+        {/* Strong Rim Light - Backlight to define the basin shape against dark background */}
+        <spotLight 
+          position={[0, 5, -8]} 
+          angle={1.0} 
+          penumbra={0.5} 
+          intensity={5.0} 
+          color="#38bdf8" 
+          distance={20}
+        />
 
-      <ambientLight intensity={0.1} color="#001020" />
-      
-      {/* Main "God Ray" from top-down */}
-      <spotLight
-        position={[0, 8, 2]}
-        target-position={[0, 0, 0]}
-        angle={0.5}
-        penumbra={0.5}
-        intensity={2.0}
-        color="#c0e0ff"
-        castShadow
-      />
-      
-      {/* Rim light / Bounce light */}
-      <pointLight position={[-4, 2, -4]} intensity={0.5} color="#406080" />
-      <pointLight position={[4, 1, 4]} intensity={0.3} color="#102030" />
+        {/* Top-down Highlight - Brings out the liquid and inner basin texture */}
+        <spotLight 
+          position={[0, 15, 0]} 
+          angle={0.3} 
+          penumbra={1} 
+          intensity={1.0} 
+          color="#ffffff" 
+        />
+        
+        <color attach="background" args={['#050505']} />
+        
+        <Suspense fallback={null}>
+          <PensieveBasin />
+          <PensieveLiquid />
+          <PensieveLanguageRing />
+          <MemoryParticles />
+          {isUnlocked && <MemoryThread />}
+          
+          <Environment preset="night" blur={0.8} />
+        </Suspense>
 
-      <group position={[0, -1.5, 0]}>
-        <PensieveBasin />
-        <PensieveLiquid />
-        <MemoryThread />
-        <MemoryParticles />
-      </group>
-
-      <EffectComposer>
-        <Bloom luminanceThreshold={0.4} mipmapBlur intensity={1.2} radius={0.5} />
-        <Vignette offset={0.2} darkness={0.7} eskil={false} />
-        <Noise opacity={0.03} blendFunction={BlendFunction.OVERLAY} />
-      </EffectComposer>
-      
-      <ResponsiveCamera />
-    </>
-  );
-};
-
-export const PensieveScene = (props: PensieveSceneProps) => {
-  return (
-    <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, zIndex: 0 }}>
-      <Canvas
-        // Cinematic high-angle camera (initial props, overridden by ResponsiveCamera)
-        camera={{ position: [0, 6, 5], fov: 35, near: 0.1, far: 100 }}
-        dpr={[1, 2]}
-        shadows
-        gl={{ toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.0 }}
-      >
-        <SceneContent onRevealCompleted={props.onRevealCompleted} />
+        <EffectComposer>
+          <Bloom 
+            luminanceThreshold={0.2} 
+            luminanceSmoothing={0.9} 
+            intensity={0.8} 
+            radius={0.6}
+            mipmapBlur
+          />
+          <Noise opacity={0.05} />
+          <Vignette eskil={false} offset={0.1} darkness={1.1} />
+        </EffectComposer>
       </Canvas>
     </div>
   );
 };
+
+export default PensieveScene;
+

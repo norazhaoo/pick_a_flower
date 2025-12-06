@@ -1,38 +1,40 @@
 import React from 'react';
+import { cn } from '@/utils/cn';
 
-interface SigilButtonProps {
-  onClick: () => void;
-  label?: string;
-  disabled?: boolean;
-  className?: string;
+interface SigilButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'primary' | 'secondary';
 }
 
-export const SigilButton: React.FC<SigilButtonProps> = ({ onClick, label, disabled, className }) => {
+const SigilButton: React.FC<SigilButtonProps> = ({ 
+  children, 
+  className, 
+  variant = 'primary',
+  ...props 
+}) => {
   return (
-    <button 
-      onClick={onClick} 
-      disabled={disabled} 
-      className={`sigil-button ${className || ''}`}
-      aria-label={label}
+    <button
+      className={cn(
+        "relative px-8 py-3 font-display tracking-[0.2em] uppercase text-sm transition-all duration-500 group overflow-hidden",
+        variant === 'primary' 
+          ? "text-white/80 hover:text-white" 
+          : "text-white/60 hover:text-white",
+        className
+      )}
+      {...props}
     >
-      <svg viewBox="0 0 100 100" className="sigil-svg">
-        <defs>
-          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="4" result="coloredBlur" />
-            <feMerge>
-              <feMergeNode in="coloredBlur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-        <circle cx="50" cy="50" r="45" stroke="currentColor" strokeWidth="1" fill="transparent" className="sigil-ring-outer" />
-        <circle cx="50" cy="50" r="35" stroke="currentColor" strokeWidth="2" fill="transparent" className="sigil-ring-inner" />
-        {/* Runes / Glyphs */}
-        <path d="M50 15 L50 35 M50 65 L50 85 M15 50 L35 50 M65 50 L85 50" stroke="currentColor" strokeWidth="2" className="sigil-cross" />
-        <circle cx="50" cy="50" r="10" fill="currentColor" className="sigil-core" filter="url(#glow)" />
-      </svg>
-      {label && <span className="sigil-label">{label}</span>}
+      <span className="relative z-10">{children}</span>
+      
+      {/* Subtle background glow */}
+      <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-md" />
+      
+      {/* Border lines */}
+      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/30 to-transparent opacity-50 group-hover:opacity-100 transition-opacity" />
+      <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/30 to-transparent opacity-50 group-hover:opacity-100 transition-opacity" />
+      
+      {/* Particles or glimmer effect could go here */}
     </button>
   );
 };
+
+export default SigilButton;
 

@@ -1,39 +1,59 @@
 import { create } from 'zustand';
 
-export type PensieveMode =
-  | 'IDLE'
-  | 'CASTING'
-  | 'LOCKED'
-  | 'UNLOCKING'
-  | 'REVEALED';
+export type PensieveMode = 'idle' | 'input' | 'viewing' | 'unlocking';
+export type Language = 'en' | 'zh' | 'ko' | 'ja' | 'fr' | 'spell';
 
-export interface PensieveStore {
+interface PensieveState {
   mode: PensieveMode;
+  language: Language;
+  isHovered: boolean;
+  memoryText: string;
+  memoryKey: string;
+  decryptedMemory: string | null;
+  isUnlocked: boolean;
+  isLoading: boolean;
+  error: string | null;
+  
   setMode: (mode: PensieveMode) => void;
-  
-  // Interaction state
-  lastRipple: number;
-  triggerRipple: () => void;
-
-  // UI signaling
-  isBasinHovered: boolean;
-  setBasinHovered: (hovered: boolean) => void;
-  
-  // Used to trigger UI opening from 3D click
-  requestOpenUI: boolean;
-  setRequestOpenUI: (open: boolean) => void;
+  setLanguage: (lang: Language) => void;
+  setIsHovered: (hovered: boolean) => void;
+  setMemoryText: (text: string) => void;
+  setMemoryKey: (key: string) => void;
+  setDecryptedMemory: (text: string | null) => void;
+  setIsUnlocked: (unlocked: boolean) => void;
+  setIsLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
+  reset: () => void;
 }
 
-export const usePensieveStore = create<PensieveStore>((set) => ({
-  mode: 'IDLE',
+export const usePensieveState = create<PensieveState>((set) => ({
+  mode: 'idle',
+  language: 'en',
+  isHovered: false,
+  memoryText: '',
+  memoryKey: '',
+  decryptedMemory: null,
+  isUnlocked: false,
+  isLoading: false,
+  error: null,
+
   setMode: (mode) => set({ mode }),
-  
-  lastRipple: 0,
-  triggerRipple: () => set({ lastRipple: Date.now() }),
-
-  isBasinHovered: false,
-  setBasinHovered: (isBasinHovered) => set({ isBasinHovered }),
-
-  requestOpenUI: false,
-  setRequestOpenUI: (requestOpenUI) => set({ requestOpenUI }),
+  setLanguage: (language) => set({ language }),
+  setIsHovered: (isHovered) => set({ isHovered }),
+  setMemoryText: (memoryText) => set({ memoryText }),
+  setMemoryKey: (memoryKey) => set({ memoryKey }),
+  setDecryptedMemory: (decryptedMemory) => set({ decryptedMemory }),
+  setIsUnlocked: (isUnlocked) => set({ isUnlocked }),
+  setIsLoading: (isLoading) => set({ isLoading }),
+  setError: (error) => set({ error }),
+  reset: () => set({
+    mode: 'idle',
+    memoryText: '',
+    memoryKey: '',
+    decryptedMemory: null,
+    isUnlocked: false,
+    isLoading: false,
+    error: null
+  })
 }));
+

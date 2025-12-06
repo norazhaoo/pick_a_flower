@@ -1,29 +1,21 @@
-import type { EncryptedMemoryPayload } from './crypto';
+export const generateShareLink = (ciphertext: string): string => {
+  const baseUrl = window.location.origin;
+  // We use hash so the data isn't sent to the server (if any) and it looks cleaner
+  // Encode the ciphertext to be URL safe
+  const encoded = encodeURIComponent(ciphertext);
+  return `${baseUrl}/#m=${encoded}`;
+};
 
-export function serializePayload(payload: EncryptedMemoryPayload): string {
-  const json = JSON.stringify(payload);
-  return encodeURIComponent(window.btoa(json));
-}
-
-export function deserializePayload(encoded: string): EncryptedMemoryPayload | null {
-  try {
-    const json = window.atob(decodeURIComponent(encoded));
-    const payload = JSON.parse(json);
-    
-    // Basic validation
-    if (
-      payload.version === 1 &&
-      payload.algorithm === 'AES-GCM' &&
-      typeof payload.salt === 'string' &&
-      typeof payload.iv === 'string' &&
-      typeof payload.ciphertext === 'string'
-    ) {
-      return payload as EncryptedMemoryPayload;
-    }
-    return null;
-  } catch (e) {
-    console.error("Failed to deserialize payload", e);
-    return null;
+export const getMemoryFromUrl = (): string | null => {
+  const hash = window.location.hash;
+  if (!hash) return null;
+  
+  const params = new URLSearchParams(hash.substring(1)); // remove #
+  const encryptedMemory = params.get('m');
+  
+  if (encryptedMemory) {
+    return decodeURIComponent(encryptedMemory);
   }
-}
+  return null;
+};
 

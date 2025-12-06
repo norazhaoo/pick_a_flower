@@ -1,112 +1,130 @@
-import { useState, useEffect } from 'react';
-import { usePensieveStore } from '../../state/pensieveState';
-import { encryptDiary } from '../../utils/crypto';
-import { serializePayload } from '../../utils/url';
-import { MagicInputOverlay } from '../ui/MagicInputOverlay';
-import { SigilButton } from '../ui/SigilButton';
+import React, { useState } from 'react';
+import { usePensieveState } from '@/state/pensieveState';
+import { useTranslation } from '@/utils/translations';
+import { encryptMemory } from '@/utils/crypto';
+import { generateShareLink } from '@/utils/url';
+import MagicInput from '../ui/MagicInput';
+import SigilButton from '../ui/SigilButton';
+import { Copy, Check } from 'lucide-react';
 
-export const CreateMemoryPanel = () => {
-  const [diaryText, setDiaryText] = useState('');
-  const [passphrase, setPassphrase] = useState('');
-  const [generatedUrl, setGeneratedUrl] = useState<string | null>(null);
-  const [isEncrypting, setIsEncrypting] = useState(false);
-  const [isOverlayVisible, setIsOverlayVisible] = useState(false);
-  
-  const setMode = usePensieveStore((state) => state.setMode);
-  const requestOpenUI = usePensieveStore((state) => state.requestOpenUI);
-  const setRequestOpenUI = usePensieveStore((state) => state.setRequestOpenUI);
+const CreateMemoryPanel: React.FC = () => {
+  const { setMode, language } = usePensieveState();
+  const t = useTranslation(language);
+  const [text, setText] = useState('');
+  const [key, setKey] = useState('');
+  const [shareLink, setShareLink] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
-  // Listen for scene interaction to open UI
-  useEffect(() => {
-    if (requestOpenUI && !isOverlayVisible && !generatedUrl) {
-      setIsOverlayVisible(true);
-      setRequestOpenUI(false);
-    }
-  }, [requestOpenUI, isOverlayVisible, generatedUrl, setRequestOpenUI]);
+  const handleCast = () => {
+    if (!text || !key) return;
+    
+    setTimeout(() => {
+      const ciphertext = encryptMemory(text, key);
+      const link = generateShareLink(ciphertext);
+      setShareLink(link);
+    }, 800);
+  };
 
-  const handleCastMemory = async () => {
-    if (!diaryText || !passphrase) return;
-
-    setIsEncrypting(true);
-    setMode('CASTING');
-
-    try {
-      // Simulate animation delay/casting time
-      await new Promise(resolve => setTimeout(resolve, 2500));
-
-      const payload = await encryptDiary(diaryText, passphrase);
-      const encoded = serializePayload(payload);
-      const url = `${window.location.origin}${window.location.pathname}?data=${encoded}`;
-      
-      setGeneratedUrl(url);
-      setMode('LOCKED');
-      setIsOverlayVisible(false);
-    } catch (error) {
-      console.error("Encryption failed", error);
-      setMode('IDLE');
-    } finally {
-      setIsEncrypting(false);
+  const copyLink = () => {
+    if (shareLink) {
+      navigator.clipboard.writeText(shareLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
   };
 
-  const copyToClipboard = () => {
-    if (generatedUrl) {
-      navigator.clipboard.writeText(generatedUrl);
-      // Could add a subtle toast here instead of alert, but alert is fine for now as per original
-      alert('URL copied to clipboard');
-    }
+  const reset = () => {
+    setShareLink(null);
+    setText('');
+    setKey('');
+    // Clear the hash from URL if any
+    window.history.pushState(null, '', window.location.pathname);
+    setMode('idle');
   };
 
-  if (generatedUrl) {
+  if (shareLink) {
     return (
-      <div className="result-floating fade-in">
-        <p className="magic-label">The memory is bound.</p>
-        <div className="result-url" onClick={copyToClipboard} title="Click to copy">
-          {generatedUrl}
+      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none p-4">
+        <div className="pointer-events-auto w-full max-w-lg px-4 md:px-6 text-center space-y-6 md:space-y-12">
+          <div className="space-y-2 md:space-y-4">
+            <h2 
+              className="text-4xl md:text-5xl lg:text-6xl text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+              style={{ fontFamily: '"Pinyon Script", cursive' }}
+            >
+              {t.memoryPreserved}
+            </h2>
+            <p className="text-white/80 font-serif italic text-[10px] md:text-xs lg:text-sm tracking-widest drop-shadow-md">
+              {t.threadSpun}
+            </p>
+          </div>
+          
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4">
+            <div className="relative group w-full max-w-xs mx-auto">
+                <input 
+                    readOnly 
+                    value={shareLink} 
+                    className="bg-transparent w-full text-white text-xs font-mono focus:outline-none tracking-tight opacity-80 py-2 text-center transition-all border-none ring-0 outline-none drop-shadow-md overflow-hidden text-ellipsis whitespace-nowrap"
+                />
+                <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent" />
+            </div>
+            <button onClick={copyLink} className="text-white/70 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-full shrink-0">
+                {copied ? <Check size={16} /> : <Copy size={16} />}
+            </button>
+          </div>
+
+          <div className="pt-4 md:pt-8">
+            <SigilButton onClick={reset} variant="secondary">{t.close}</SigilButton>
+          </div>
         </div>
-        <p className="hint" style={{ marginTop: '1rem', color: '#a0d0ff' }}>
-          Only the keeper of the passphrase can unlock it.
-        </p>
-        <button 
-           onClick={() => window.location.reload()} 
-           style={{ marginTop: '2rem', background: 'transparent', border: '1px solid #a0d0ff', color: '#a0d0ff' }}
-        >
-          Create Another
-        </button>
       </div>
     );
   }
 
   return (
-    <>
-       {!isOverlayVisible && !generatedUrl && (
-         <div style={{ 
-            position: 'absolute', 
-            bottom: '20%', 
-            pointerEvents: 'none', 
-            opacity: 0.7,
-            fontFamily: 'var(--font-serif)',
-            textShadow: '0 0 10px var(--color-accent-glow)'
-         }}>
-            Touch the basin to whisper a memory...
-         </div>
-       )}
-    
-      <MagicInputOverlay
-        mode="create"
-        visible={isOverlayVisible && !isEncrypting}
-        diaryValue={diaryText}
-        onDiaryChange={setDiaryText}
-        passphraseValue={passphrase}
-        onPassphraseChange={setPassphrase}
-        headerText="Whisper your memory..."
-      >
-        <SigilButton 
-          onClick={handleCastMemory}
-          disabled={!diaryText || !passphrase || isEncrypting}
-          label="Cast Memory"
-        />
-      </MagicInputOverlay>
-    </>
+    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none p-4">
+      <div className="pointer-events-auto w-full max-w-lg px-4 md:px-6 space-y-6 md:space-y-12 mt-[-5vh] md:mt-[-10vh]">
+        <div className="text-center space-y-2 md:space-y-4">
+          <h2 
+            className="text-4xl md:text-5xl lg:text-7xl text-white drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)] pb-2"
+            style={{ fontFamily: '"Pinyon Script", cursive' }}
+          >
+            {t.castMemory}
+          </h2>
+          <p className="text-white/70 text-[10px] md:text-xs font-serif tracking-[0.2em] uppercase drop-shadow-md">
+            {t.pourThoughts}
+          </p>
+        </div>
+
+        <div className="space-y-6 md:space-y-12">
+          <MagicInput 
+            as="textarea" 
+            placeholder={t.writeMemory}
+            rows={2}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+          />
+          
+          <MagicInput 
+            type="text" 
+            label={t.secretKey}
+            placeholder={t.wordToSeal}
+            value={key}
+            onChange={(e) => setKey(e.target.value)}
+          />
+        </div>
+
+        <div className="flex flex-col-reverse md:flex-row justify-center gap-6 md:gap-16 pt-2 md:pt-8 items-center">
+          <button 
+            onClick={() => setMode('idle')}
+            className="text-[10px] tracking-[0.3em] text-white/60 hover:text-white transition-colors uppercase font-serif drop-shadow-md py-2"
+          >
+            {t.discard}
+          </button>
+          <SigilButton onClick={handleCast} disabled={!text || !key} className="w-full md:w-auto">{t.castMemory}</SigilButton>
+        </div>
+      </div>
+    </div>
   );
 };
+
+export default CreateMemoryPanel;
